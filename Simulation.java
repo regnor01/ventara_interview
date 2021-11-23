@@ -82,6 +82,7 @@ private static int total; //total of adding all the scores. Update this as the p
             total += players[NUM_PLAYERS - CUTOFFPLACE];
             topScores.add(players[NUM_PLAYERS - CUTOFFPLACE]);
         }
+        Collections.sort(topScores);
         String message = "Average Score: " + getAverage() + " Median Score: " + getMedian();
         JOptionPane.showMessageDialog(null, message);
     }
