@@ -1,3 +1,4 @@
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,16 +16,34 @@ private static ArrayList<Integer> topScores; //
 private static int total; //total of adding all the scores. Update this as the program runs to save on speed
 
     public static void main(String[] args) {
+        int changePoints = -1;
         try {
-            NUM_SIMULATIONS = Integer.parseInt(JOptionPane.showInputDialog("How many simulations do you want to run?"));
-            NUM_PLAYERS = Integer.parseInt(JOptionPane.showInputDialog("How many players do you want to test with?"));
+            int skip = JOptionPane.showConfirmDialog(null, "Run with defaults?", ""
+                + "Point Distribution", JOptionPane.YES_NO_OPTION);
+            if (skip == JOptionPane.CLOSED_OPTION) {
+                System.exit(0);
+            }
+            if (skip == 1) {
+                NUM_SIMULATIONS = Integer.parseInt(JOptionPane.showInputDialog("How many simulations do you want to run?"));
+                NUM_PLAYERS = Integer.parseInt(JOptionPane.showInputDialog("How many players do you want to test with?"));
+                NUM_SEATS = Integer.parseInt(JOptionPane.showInputDialog("How many players per one game?"));
+                if (NUM_SEATS > NUM_PLAYERS) {
+                    throw new NumberFormatException("Can't run with more seats than players"); //currently does not give user any input
+                }
+                ROUNDS = Integer.parseInt(JOptionPane.showInputDialog("How many rounds do you want to play?"));
+                changePoints = JOptionPane.showConfirmDialog(null, "Do you want to change the point distribution from the default?", ""
+                    + "Point Distribution", JOptionPane.YES_NO_OPTION);
+            }
         }
         catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "You didn't write a number. Exiting.");
+            JOptionPane.showMessageDialog(null, "Invalid input");
             return;
         }
         
-        
+        POINT_DISTRIBUTION = Arrays.copyOf(POINT_DISTRIBUTION, NUM_SEATS); //Assuming zero for places after 8 unless contradicted
+        if (changePoints == 0) {
+            changePointDistribution();
+        }
         
         topScores = new ArrayList<Integer>(NUM_SIMULATIONS);
         for (int i = 0; i < NUM_SIMULATIONS; i++) {
@@ -83,6 +102,51 @@ private static int total; //total of adding all the scores. Update this as the p
     private static int getMedian() {
         
         return topScores.get(topScores.size() / 2);
+    }
+    
+    /**
+     * Changes point distribution by user input
+     */
+    private static void changePointDistribution() {
+        for (int i = 0; i < NUM_SEATS; i++) {
+            int hasCompleted = 0;
+            while (hasCompleted == 0) {
+                try {
+                    String response = JOptionPane.showInputDialog("Please enter "
+                        + "the number of points for "+ changePlaceToWord(i + 1) + " place.");
+                    if (response == null) {
+                        System.exit(0);
+                    }
+                    POINT_DISTRIBUTION[i] = Integer.parseInt(response);
+                    hasCompleted = 1;
+                }
+                catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(null, "Could not parse number. Please try again.");
+                }
+            }
+        }
+    }
+    
+    /**
+     * Takes in a number and returns it as adjective
+     * @param place 
+     * @return 1st is place == 1, 2nd if place == 2, get the idea
+     */
+    private static String changePlaceToWord(int place) {
+        int leastSignificant = place % 10;
+        if ((place / 10) % 10 == 1) {
+            return place + "th"; //handles 11-19 
+        }
+        switch(leastSignificant) {
+            case 1:
+                return place + "st";
+            case 2:
+                 return place + "nd";
+            case 3:
+                return place + "rd";
+            default:
+                return place + "th";
+        }
     }
     
 }
