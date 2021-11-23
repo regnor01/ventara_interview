@@ -11,32 +11,57 @@ public static int NUM_SIMULATIONS = 1000;
 public static int NUM_SEATS = 8; //seats per table for an individual game
 public static int ROUNDS = 7; //rounds in the first stage
 public static int[] POINT_DISTRIBUTION = {10,8,6,5,3,2,1,1};
+public static int CUTOFFPLACE = 32; //this is the last place that advances to the next round
 
 private static ArrayList<Integer> topScores; //
 private static int total; //total of adding all the scores. Update this as the program runs to save on speed
 
     public static void main(String[] args) {
         int changePoints = -1;
+        String errorMessage = "Invalid Input. Please try again";
         try {
+            
             int skip = JOptionPane.showConfirmDialog(null, "Run with defaults?", ""
                 + "Point Distribution", JOptionPane.YES_NO_OPTION);
             if (skip == JOptionPane.CLOSED_OPTION) {
                 System.exit(0);
             }
             if (skip == 1) {
-                NUM_SIMULATIONS = Integer.parseInt(JOptionPane.showInputDialog("How many simulations do you want to run?"));
-                NUM_PLAYERS = Integer.parseInt(JOptionPane.showInputDialog("How many players do you want to test with?"));
-                NUM_SEATS = Integer.parseInt(JOptionPane.showInputDialog("How many players per one game?"));
-                if (NUM_SEATS > NUM_PLAYERS) {
-                    throw new NumberFormatException("Can't run with more seats than players"); //currently does not give user any input
+                
+                NUM_SIMULATIONS = getInputFromUser("How many simulations do you want to run?");
+                
+                NUM_PLAYERS = getInputFromUser("How many players do you want to test with?");
+                boolean invalid = true;
+                while (invalid) {
+                    NUM_SEATS = getInputFromUser("How many players per game?");
+                    if (NUM_SEATS > NUM_PLAYERS) {
+                        errorMessage = "Cannot have more seats than players per game.";
+                        throw new NumberFormatException("Can't run with more seats than players");
+                    }
+                    else {
+                        invalid = false;
+                    }
                 }
-                ROUNDS = Integer.parseInt(JOptionPane.showInputDialog("How many rounds do you want to play?"));
+                invalid = true;
+                ROUNDS = getInputFromUser("How many rounds per simulation?");
+                while (invalid) {
+                    CUTOFFPLACE = getInputFromUser("How many players can advance to the second stage?");
+                    if (CUTOFFPLACE > NUM_PLAYERS) {
+                        errorMessage = "Cannot have more players advancing than players playing.";
+                        throw new NumberFormatException("Can't run with more places than players");
+                    }
+                    else {
+                        invalid = false;
+                    }
+                }
+                
+                
                 changePoints = JOptionPane.showConfirmDialog(null, "Do you want to change the point distribution from the default?", ""
                     + "Point Distribution", JOptionPane.YES_NO_OPTION);
             }
         }
         catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "Invalid input");
+            JOptionPane.showMessageDialog(null, errorMessage);
             return;
         }
         
@@ -54,8 +79,8 @@ private static int total; //total of adding all the scores. Update this as the p
             Arrays.sort(players);
             //We only care about the cutoff point, 
             //so we'll only consider the "last place" person who passes to the second round
-            total += players[NUM_PLAYERS - 32];
-            topScores.add(players[NUM_PLAYERS - 32]);
+            total += players[NUM_PLAYERS - CUTOFFPLACE];
+            topScores.add(players[NUM_PLAYERS - CUTOFFPLACE]);
         }
         String message = "Average Score: " + getAverage() + " Median Score: " + getMedian();
         JOptionPane.showMessageDialog(null, message);
@@ -70,6 +95,8 @@ private static int total; //total of adding all the scores. Update this as the p
         for (int i =0; i < ROUNDS; i++) {
             Collections.shuffle(intList); //while not realistic, we will take this random ordering of players and correlate their
                                            //position to the game to their score. This is random as all players have equal skill.
+                                            //If the number of players is not evenly divisible by number of seats, num_players % num_seats
+                                            //players will earn 0 points per round.
             for (int j =0; j < intList.size(); j += NUM_SEATS) {
                 oneGame(intList, j);
             }
@@ -147,6 +174,36 @@ private static int total; //total of adding all the scores. Update this as the p
             default:
                 return place + "th";
         }
+    }
+    
+    /**
+     * Grabs a certain number from the user. Number can't be negative
+     * @param question the string displayed to the user
+     * @return the number to user entered
+     */
+    private static int getInputFromUser(String question) {
+        
+        int result = -1;
+        boolean inputWorked = false;
+        while (!inputWorked) {
+            try {
+                String status = JOptionPane.showInputDialog(question);
+                if (status == null) {
+                    System.exit(0);
+                }
+                result = Integer.parseInt(status);
+                if (result < 0) {
+                    JOptionPane.showMessageDialog(null, "Please enter only positive numbers for this value.");
+                }
+                else {
+                    inputWorked = true;
+                }
+            }
+            catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Invalid input. Please try again.");
+            }
+        }
+        return result;
     }
     
 }
