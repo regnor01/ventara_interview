@@ -36,7 +36,7 @@ private static int total; //total of adding all the scores. Update this as the p
                     NUM_SEATS = getInputFromUser("How many players per game?");
                     if (NUM_SEATS > NUM_PLAYERS) {
                         errorMessage = "Cannot have more seats than players per game.";
-                        throw new NumberFormatException("Can't run with more seats than players");
+                        JOptionPane.showMessageDialog(null, errorMessage);
                     }
                     else {
                         invalid = false;
@@ -48,7 +48,7 @@ private static int total; //total of adding all the scores. Update this as the p
                     CUTOFFPLACE = getInputFromUser("How many players can advance to the second stage?");
                     if (CUTOFFPLACE > NUM_PLAYERS) {
                         errorMessage = "Cannot have more players advancing than players playing.";
-                        throw new NumberFormatException("Can't run with more places than players");
+                        JOptionPane.showMessageDialog(null, errorMessage);
                     }
                     else {
                         invalid = false;
