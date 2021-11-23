@@ -193,7 +193,7 @@ private static int total; //total of adding all the scores. Update this as the p
                     System.exit(0);
                 }
                 result = Integer.parseInt(status);
-                if (result < 0) {
+                if (result <= 0) {
                     JOptionPane.showMessageDialog(null, "Please enter only positive numbers for this value.");
                 }
                 else {
